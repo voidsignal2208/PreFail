@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "probability.h"
-
+# include "bayes.h"
 int main() {
     // Seed random number generator
     srand(time(NULL));
@@ -24,6 +24,24 @@ int main() {
     // Exponential probability
     printf("Exponential Probability (t=2, lambda=0.5): %.5f\n",
            exponential_probability(2.0, 0.5));
+
+    printf("\n=== Bayesian Risk Update ===\n");
+
+    // Initial belief
+    double prior_default_risk = 0.10;
+
+    // Evidence: missed payment observed
+    double likelihood = 0.7;   // P(missed payment | default risk)
+    double evidence = 0.25;    // P(missed payment)
+
+    double updated_risk = bayesian_update(
+        prior_default_risk,
+        likelihood,
+        evidence
+    );
+
+    printf("Prior risk: %.2f\n", prior_default_risk);
+    printf("Updated risk after warning: %.2f\n", updated_risk);
 
     return 0;
 }
