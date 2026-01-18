@@ -19,16 +19,7 @@ const char* risk_state_to_string(RiskState state) {
             return "UNKNOWN";
     }
 }
-
-int main() {
-       int time_steps = 12;          // simulate 12 time units(eg: for 12 months of year)
-       double warning_probability = 0.3;
-       double risk = 0.10;   // initial risk
-       double decay_factor = 0.95; //Used in risk decay(handling risk>1)
-
-    // Seed random number generator
-    srand(time(NULL));
-
+void run_probability_tests(void){
     printf("=== PreFail Probability Test ===\n\n");
 
     // Bernoulli trial
@@ -46,7 +37,8 @@ int main() {
     // Exponential probability
     printf("Exponential Probability (t=2, lambda=0.5): %.5f\n",
            exponential_probability(2.0, 0.5));
-
+}
+void run_bayesian_demo(void){
     printf("\n=== Bayesian Risk Update ===\n");
 
     // Initial belief
@@ -68,45 +60,103 @@ int main() {
 
        printf("Risk value: %.2f\n", updated_risk);
        printf("Risk state: %s\n", risk_state_to_string(state));
-       
-       printf("\n=== Time-Based Risk Simulation ===\n");
 
-       for (int t = 1; t <= time_steps; t++) {
-       printf("\nTime step %d\n", t);
+}
+void run_time_simulation(void) {
+    printf("\n=== Time-Based Risk Simulation ===\n");
 
-       int warning = bernoulli_trial(warning_probability);
+    int time_steps = 12;
+    double warning_probability = 0.3;
+    double decay_factor = 0.95;
+    double risk = 0.10;
 
-       if (warning) {
-              printf("Warning detected!\n");
+    for (int t = 1; t <= time_steps; t++) {
+        printf("\nTime step %d\n", t);
 
-              double likelihood = 0.7;
-              double evidence = warning_probability;
+        int warning = bernoulli_trial(warning_probability);
 
-              risk = bayesian_update(risk, likelihood, evidence);
-       } else {
-              printf("No warning. Risk decays.\n");
-              risk = risk * decay_factor;
-       }
-       if (risk > 1.0) {
-          risk = 1.0;
-       }
-       if (risk < 0.0) {
-              risk = 0.0;
-       }
+        if (warning) {
+            printf("Warning detected!\n");
 
+            double likelihood = 0.7;
+            double evidence = warning_probability;
+            risk = bayesian_update(risk, likelihood, evidence);
+        } else {
+            printf("No warning. Risk decays.\n");
+            risk *= decay_factor;
+        }
 
+        if (risk > 1.0) risk = 1.0;
+        if (risk < 0.0) risk = 0.0;
 
-       RiskState state = classify_risk(risk);
+        RiskState state = classify_risk(risk);
 
-       printf("Risk value: %.2f\n", risk);
-       printf("Risk state: %s\n", risk_state_to_string(state));
+        printf("Risk value: %.2f\n", risk);
+        printf("Risk state: %s\n", risk_state_to_string(state));
 
-       if (state == RISK_FAILED) {
-              printf("System has FAILED. Stopping simulation.\n");
-              break;
-       }
-       }
+        if (state == RISK_FAILED) {
+            printf("System has FAILED. Stopping simulation.\n");
+            break;
+        }
+    }
+}
 
+void run_monte_carlo(void) {
+    printf("\n=== Monte Carlo Failure Prediction ===\n");
+
+    int simulations = 1000;
+    int max_time_steps = 12;
+    double warning_probability = 0.3;
+    double decay_factor = 0.95;
+
+    int failures = 0;
+    int total_failure_time = 0;
+
+    for (int s = 0; s < simulations; s++) {
+        double risk = 0.10;
+
+        for (int t = 1; t <= max_time_steps; t++) {
+            int warning = bernoulli_trial(warning_probability);
+
+            if (warning) {
+                double likelihood = 0.7;
+                double evidence = warning_probability;
+                risk = bayesian_update(risk, likelihood, evidence);
+            } else {
+                risk *= decay_factor;
+            }
+
+            if (risk > 1.0) risk = 1.0;
+            if (risk < 0.0) risk = 0.0;
+
+            if (classify_risk(risk) == RISK_FAILED) {
+                failures++;
+                total_failure_time += t;
+                break;
+            }
+        }
+    }
+
+    double failure_probability = (double)failures / simulations;
+
+    printf("Simulations run: %d\n", simulations);
+    printf("Failures observed: %d\n", failures);
+    printf("Probability of failure within %d steps: %.3f\n",
+           max_time_steps, failure_probability);
+
+    if (failures > 0) {
+        printf("Average time to failure: %.2f steps\n",
+               (double)total_failure_time / failures);
+    }
+}
+
+int main(void) {
+    srand(time(NULL));
+
+    run_probability_tests();
+    run_bayesian_demo();
+    run_time_simulation();
+    run_monte_carlo();
 
     return 0;
 }
