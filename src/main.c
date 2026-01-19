@@ -44,9 +44,8 @@ void run_bayesian_demo(void){
     // Initial belief
     double prior_default_risk = 0.10;
 
-    // Evidence: missed payment observed
-    double likelihood = 0.7;   // P(missed payment | default risk)
-    double evidence = 0.25;    // P(missed payment)
+    double likelihood = 0.7;   
+    double evidence = 0.25;    
 
     double updated_risk = bayesian_update(
         prior_default_risk,
