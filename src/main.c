@@ -5,7 +5,7 @@
 # include "bayes.h"
 #include "risk_state.h"
 
-const char* risk_state_to_string(RiskState state) {
+const char* risk_state_to_string(RiskState state){
     switch (state) {
         case RISK_SAFE:
             return "SAFE";
@@ -74,13 +74,13 @@ void run_time_simulation(void) {
 
         int warning = bernoulli_trial(warning_probability);
 
-        if (warning) {
+        if (warning){
             printf("Warning detected!\n");
 
             double likelihood = 0.7;
             double evidence = warning_probability;
             risk = bayesian_update(risk, likelihood, evidence);
-        } else {
+        } else{
             printf("No warning. Risk decays.\n");
             risk *= decay_factor;
         }
@@ -93,14 +93,14 @@ void run_time_simulation(void) {
         printf("Risk value: %.2f\n", risk);
         printf("Risk state: %s\n", risk_state_to_string(state));
 
-        if (state == RISK_FAILED) {
+        if (state == RISK_FAILED){
             printf("System has FAILED. Stopping simulation.\n");
             break;
         }
     }
 }
 
-void run_monte_carlo(void) {
+void run_monte_carlo(void){
     printf("\n=== Monte Carlo Failure Prediction ===\n");
 
     int simulations = 1000;
@@ -111,24 +111,24 @@ void run_monte_carlo(void) {
     int failures = 0;
     int total_failure_time = 0;
 
-    for (int s = 0; s < simulations; s++) {
+    for (int s = 0; s < simulations; s++){
         double risk = 0.10;
 
-        for (int t = 1; t <= max_time_steps; t++) {
+        for (int t = 1; t <= max_time_steps; t++){
             int warning = bernoulli_trial(warning_probability);
 
-            if (warning) {
+            if (warning){
                 double likelihood = 0.7;
                 double evidence = warning_probability;
                 risk = bayesian_update(risk, likelihood, evidence);
-            } else {
+            } else{
                 risk *= decay_factor;
             }
 
             if (risk > 1.0) risk = 1.0;
             if (risk < 0.0) risk = 0.0;
 
-            if (classify_risk(risk) == RISK_FAILED) {
+            if (classify_risk(risk) == RISK_FAILED){
                 failures++;
                 total_failure_time += t;
                 break;
@@ -136,7 +136,7 @@ void run_monte_carlo(void) {
         }
     }
 
-    double failure_probability = (double)failures / simulations;
+    double failure_probability = (double)failures/simulations;
 
     printf("Simulations run: %d\n", simulations);
     printf("Failures observed: %d\n", failures);
@@ -149,7 +149,7 @@ void run_monte_carlo(void) {
     }
 }
 
-int main(void) {
+int main(void){
     srand(time(NULL));
 
     run_probability_tests();

@@ -2,7 +2,7 @@
 #include <math.h>
 #include "probability.h"
 
-// Simulate a Bernoulli trial
+// Bernoulli trial
 int bernoulli_trial(double p) {
     double r = (double)rand() / RAND_MAX; //a random value between 0 to 1
     return (r < p) ? 1 : 0;
@@ -25,7 +25,7 @@ double binomial_probability(int n, int k, double p) {
 
 // Poisson distribution
 double poisson_probability(int k, double lambda) {
-    return (pow(lambda, k) * exp(-lambda)) / tgamma(k + 1); //
+    return (pow(lambda, k) * exp(-lambda)) / tgamma(k + 1);
 }
 
 // Exponential distribution
